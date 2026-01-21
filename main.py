@@ -1,7 +1,11 @@
 import pygame
-import player
+import sys
+from player import Player
+from asteroid import Asteroid
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH
-from logger import log_state
+from logger import log_state, log_event
+from asteroidfield import AsteroidField
+from shot import Shot
 
 
 def main():
@@ -14,8 +18,14 @@ def main():
     y = SCREEN_HEIGHT / 2
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
-    player.Player.containers = (updatable, drawable)
-    new_player = player.Player(x, y)
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
+    Asteroid.containers = (asteroids, updatable, drawable)
+    Player.containers = (updatable, drawable)
+    AsteroidField.containers = (updatable, )
+    Shot.containers = (shots, updatable, drawable)
+    asteroidfield = AsteroidField()
+    new_player = Player(x, y)
 
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
@@ -29,15 +39,28 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+        
+        updatable.update(dt)
+
+        for asteroid in asteroids:
+            if asteroid.collides_with(new_player):
+                log_event("player_hit")
+                print("Game over!")
+                sys.exit()
+
+            for shot in shots:
+                if asteroid.collides_with(shot):
+                    log_event("asteroid_shot")
+                    shot.kill()
+                    asteroid.kill()
 
         screen.fill("black")
-        dt = clock.tick(60) / 1000
-        updatable.update(dt)
+
         for d in drawable:
             d.draw(screen)
 
         pygame.display.flip() #NEEDS TO BE LAST!!
-
+        dt = clock.tick(60) / 1000
         
     
 
