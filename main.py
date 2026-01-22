@@ -34,19 +34,24 @@ def main():
     print(f"Screen height: {SCREEN_HEIGHT}")
     
 
-    
+    thresholds = [
+    {"kc": 5, "player_inc": 0.2, "asteroid_inc": (45, 110)},
+    {"kc": 10, "player_inc": 0.15, "asteroid_inc": (50, 120)},
+    {"kc": 15, "player_inc": 0.1, "asteroid_inc": (55, 130)},
+    ]
     #Gameplay looppi
     while True:
         log_state()
 
         if player.kc > 5:
-            player.shoot_cooldown_seconds = 0.15
-            asteroidfield.randx = 50
-            asteroidfield.randy = 120
+            player.add_intensity(0.2)
+            asteroidfield.add_intensity(45, 110)
         if player.kc > 10:
-            player.shoot_cooldown_seconds = 0.1
-            asteroidfield.randx += 60
-            asteroidfield.randy += 140
+            player.add_intensity(0.15)
+            asteroidfield.add_intensity(50, 120)
+        if player.kc > 15:
+            player.add_intensity(0.1)
+            asteroidfield.add_intensity(55, 130)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -69,10 +74,23 @@ def main():
                     asteroid.split()
                     player.kc_add()
 
+        for t in thresholds:
+            if player.kc > t["kc"]:
+                player.add_intensity(t["player_inc"])
+                asteroidfield.add_intensity(*t["asteroid_inc"])
+                
         screen.fill("black")
+        
         for d in drawable:
             d.draw(screen)
+        
+        pygame.font.init()
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 30)
+        kc_text = font.render("Asteroids destroyed: " + str(player.kc), True, (255, 255, 255))
+        kc_text_rect = kc_text.get_rect()
+        kc_text_rect.topleft = (30,30)
 
+        screen.blit(kc_text, kc_text_rect)
         pygame.display.flip() #NEEDS TO BE LAST!!
 
 if __name__ == "__main__":

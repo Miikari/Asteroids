@@ -45,6 +45,10 @@ class Player(circleshape.CircleShape):
     def kc_add(self):
         self.kc += 1
     
+    def add_intensity(self, intensityrate):
+        self.shoot_cooldown_seconds = intensityrate
+
+    
     def update(self, dt):
         self.cooldown_timer -= dt
 
