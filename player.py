@@ -8,6 +8,8 @@ class Player(circleshape.CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.cooldown_timer = 0
+        self.kc = 0
+        self.shoot_cooldown_seconds = PLAYER_SHOOT_COOLDOWN_SECONDS
 
 
     # in the Player class
@@ -38,7 +40,10 @@ class Player(circleshape.CircleShape):
         shot.velocity = pygame.Vector2(0,1)
         shot.velocity = shot.velocity.rotate(self.rotation)
         shot.velocity *= PLAYER_SHOOT_SPEED
-        self.cooldown_timer = PLAYER_SHOOT_COOLDOWN_SECONDS
+        self.cooldown_timer = self.shoot_cooldown_seconds
+    
+    def kc_add(self):
+        self.kc += 1
     
     def update(self, dt):
         self.cooldown_timer -= dt

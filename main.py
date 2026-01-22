@@ -27,7 +27,7 @@ def main():
     Shot.containers = (shots, updatable, drawable)
 
     player = Player(x, y)
-    AsteroidField()
+    asteroidfield = AsteroidField()
 
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
     print(f"Screen width: {SCREEN_WIDTH}")
@@ -38,6 +38,15 @@ def main():
     #Gameplay looppi
     while True:
         log_state()
+
+        if player.kc > 5:
+            player.shoot_cooldown_seconds = 0.15
+            asteroidfield.randx = 50
+            asteroidfield.randy = 120
+        if player.kc > 10:
+            player.shoot_cooldown_seconds = 0.1
+            asteroidfield.randx += 60
+            asteroidfield.randy += 140
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -58,6 +67,7 @@ def main():
                     log_event("asteroid_shot")
                     shot.kill()
                     asteroid.split()
+                    player.kc_add()
 
         screen.fill("black")
         for d in drawable:
