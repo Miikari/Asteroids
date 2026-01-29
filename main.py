@@ -6,10 +6,73 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH
 from logger import log_state, log_event
+import sqlite3
 
+DB_FILE = "highscores.db"
+
+def init_db():
+    with sqlite3.connect(DB_FILE) as conn:
+        with open("schema.sql") as s:
+            conn.executescript(s.read())
+
+def add_score(player_name: str, score: int):
+    if score < 0:
+        raise ValueError("Score cannot be negative")
+
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.execute(
+            "INSERT INTO highscores (player_name, score) VALUES (?, ?)",
+            (player_name, score)
+        )
+
+
+def get_top_scores(limit=10):
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.execute("""
+            SELECT player_name, score, created_at
+            FROM highscores
+            ORDER BY score DESC
+            LIMIT ?
+        """, (limit,))
+        return cursor.fetchall()
+
+def check_score(player):
+    add_score("Miika", player.kc)
+
+def show_leaderboard():
+    screen = pygame.display.get_surface()
+    font = pygame.font.SysFont(None, 40)
+
+    scores = get_top_scores()
+
+    waiting = True
+    while waiting:
+        screen.fill("black")
+
+        title = font.render("Leaderboard", True, (255,255,0))
+        screen.blit(title, (50, 50))
+
+        for i, (name, score, _) in enumerate(scores):
+            line = font.render(f"{i+1}. {name} - {score}", True, (255,255,255))
+            screen.blit(line, (50, 120 + i*40))
+
+        hint = font.render("Press ENTER to continue", True, (150,150,150))
+        screen.blit(hint, (50, SCREEN_HEIGHT - 80))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                waiting = False
 
 def main():
     pygame.init()
+    init_db()
+
+    top = get_top_scores()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     
@@ -65,7 +128,11 @@ def main():
             if asteroid.collides_with(player):
                 log_event("player hit")
                 print("Game over!")
-                sys.exit()
+                check_score(player)
+                show_leaderboard()
+                pygame.quit()
+                main()
+                
             
             for shot in shots:
                 if shot.collides_with(asteroid):
