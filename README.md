@@ -8,11 +8,12 @@ Now kill count is shown top left of screen.
 pygame v.2.6.1
 
 # To be added
-- Restarting game instead of quit
-- Highscore on txt file or sql
+- ~Restarting game instead of quit~ ☑️
+- ~~Highscore on sql~~ ☑️
 - Player movement constraint for not be able to leave the screen
 - Background img
 - Music
 - Sound effects when asteroid is destroyed and gun sounds
 - Menu for start game and high score
+
 
